@@ -2,19 +2,32 @@
 #![no_main]
 
 mod vga_buffer;
+mod rand;
 
 use core::panic::PanicInfo;
 
-static HELLO_WORLD: &[u8] = b"doDOS is NOT extinct!";
-
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    use core::fmt::Write;
-    loop { write!(vga_buffer::WRITER.lock(), "AAAAAAAAAAAAAAAAA ").unwrap(); }
+    for i in 0..10000000 {
+        rand::PRNG.lock().gen_range(0, 1);
+        if i == 0 { println!("doDOS is NOT extinct!"); }
+    }
+
+    loop { 
+        let num_a = rand::PRNG.lock().gen_range(1, 100);
+        let num_spaces = rand::PRNG.lock().gen_range(1, 4);
+        for _ in 0..num_a {
+            print!("A"); 
+        }
+        for _ in 0..num_spaces {
+            print!(" "); 
+        }
+    }
 }
 
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
+fn panic(info: &PanicInfo) -> ! {
+    println!("You shouldn't be proud.\n {}", info);
     loop {}
 }
 

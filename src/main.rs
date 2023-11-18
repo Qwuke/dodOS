@@ -10,7 +10,7 @@ use core::panic::PanicInfo;
 pub extern "C" fn _start() -> ! {
     for i in 0..10000000 {
         rand::PRNG.lock().gen_range(0, 1);
-        if i == 0 { println!("doDOS is NOT extinct!"); }
+        if i == 0 { println!("dodOS is NOT extinct!"); }
     }
 
     loop { 

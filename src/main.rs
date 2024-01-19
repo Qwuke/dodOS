@@ -1,13 +1,11 @@
 #![no_std]
 #![no_main]
 #![feature(custom_test_frameworks)]
-#![test_runner(crate::test_runner)]
+#![test_runner(dodos::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-mod vga_buffer;
-mod rand;
-mod serial;
-
+use dodos::{print, println};
+use dodos::rand::PRNG;
 use core::panic::PanicInfo;
 
 #[no_mangle]
@@ -15,40 +13,20 @@ pub extern "C" fn _start() -> ! {
     #[cfg(test)]
     test_main();
 
-    for i in 0..10000000 {
-    
-        rand::PRNG.lock().gen_range(0, 1);
+    for i in 0..10000000 {  
+        PRNG.lock().gen_range(0, 1);
         if i == 0 { println!("dodOS is NOT extinct!"); }
     }
 
     loop { 
-        let num_a = rand::PRNG.lock().gen_range(1, 100);
-        let num_spaces = rand::PRNG.lock().gen_range(1, 4);
+        let num_a = PRNG.lock().gen_range(1, 100);
+        let num_spaces = PRNG.lock().gen_range(1, 4);
         for _ in 0..num_a {
             print!("A"); 
         }
         for _ in 0..num_spaces {
             print!(" "); 
         }
-    }
-
-    loop {
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-pub enum QemuExitCode {
-    Success = 0x10,
-    Failed = 0x11,
-}
-
-pub fn exit_qemu(exit_code: QemuExitCode) {
-    use x86_64::instructions::port::Port;
-
-    unsafe {
-        let mut port = Port::new(0xf4);
-        port.write(exit_code as u32);
     }
 }
 
@@ -62,37 +40,5 @@ fn panic(info: &PanicInfo) -> ! {
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    serial_println!("[failed]\n");
-    serial_println!("Error: {}\n", info);
-    exit_qemu(QemuExitCode::Failed);
-    loop {}
-}
-pub trait Testable {
-    fn run(&self) -> ();
-}
-
-impl<T> Testable for T
-where
-    T: Fn(),
-{
-    fn run(&self) {
-        serial_print!("{}...\t", core::any::type_name::<T>());
-        self();
-        serial_println!("[ok]");
-    }
-}
-
-#[cfg(test)]
-pub fn test_runner(tests: &[&dyn Testable]) {
-    serial_println!("Running {} tests", tests.len());
-    for test in tests {
-        test.run();
-    }
-
-    exit_qemu(QemuExitCode::Success);
-}
-
-#[test_case]
-fn trivial_assertion() {
-    assert_eq!(1, 1);
+    dodos::test_panic_handler(info)
 }

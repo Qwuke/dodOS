@@ -16,6 +16,11 @@ uart_16550 = "0.3"
 version = "1.0"
 features = ["spin_no_std"]
 
+
+[[test]]
+name = "should_panic"
+harness = false
+
 [package.metadata.bootimage]
 # The cargo subcommand that will be used for building the kernel.
 #

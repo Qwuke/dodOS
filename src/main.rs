@@ -19,6 +19,8 @@ pub extern "C" fn _start() -> ! {
         PRNG.lock().gen_range(0, 1);
         if i == 0 { println!("dodOS is NOT extinct!"); }
     }
+    
+    dodos::hlt_loop();
 
     loop { 
         let num_a = PRNG.lock().gen_range(1, 100);
@@ -36,7 +38,7 @@ pub extern "C" fn _start() -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("You shouldn't be proud.\n {}", info);
-    loop {}
+    dodos::hlt_loop();
 }
 
 #[cfg(test)]

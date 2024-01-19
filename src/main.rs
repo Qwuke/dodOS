@@ -13,6 +13,8 @@ pub extern "C" fn _start() -> ! {
     #[cfg(test)]
     test_main();
 
+    dodos::init();
+
     for i in 0..10000000 {  
         PRNG.lock().gen_range(0, 1);
         if i == 0 { println!("dodOS is NOT extinct!"); }
